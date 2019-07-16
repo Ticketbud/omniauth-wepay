@@ -29,6 +29,21 @@ module OmniAuth
          }
       end
 
+      # For WePay Canada, we need to pass that param to WePay
+      # I ripped this off from this PR
+      # https://github.com/arunagw/omniauth-twitter/pull/10/files
+
+      alias :old_request_phase :request_phase
+
+      def request_phase 
+        user_country = session['omniauth.params']['user_country']
+        if user_country && !user_country.empty?
+          options[:authorize_params] ||= {}
+          options[:authorize_params].merge!(:user_country => user_country)
+        end
+        old_request_phase
+      end
+
       def raw_info
         url = options.client_options[:site] + options.client_options[:user_path]
 
